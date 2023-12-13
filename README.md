@@ -13,4 +13,4 @@ The goal was to create my first simple Webb-API. Using REST-architecturee to ena
 
 
 ### ER-Diagram
-![alt text](https://github.com/adrozs/MiniProject_API/blob/master/[file]?raw=true)
+![alt text](https://github.com/adrozs/MiniProject_API/blob/master/API_Project_ER_Diagram.png?raw=true)
