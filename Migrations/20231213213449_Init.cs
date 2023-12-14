@@ -12,8 +12,7 @@ namespace API_Project.Migrations
                 name: "interest",
                 columns: table => new
                 {
-                    id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
@@ -26,8 +25,7 @@ namespace API_Project.Migrations
                 name: "person",
                 columns: table => new
                 {
-                    id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     firstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     lastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     phoneNumber = table.Column<int>(type: "int", nullable: false)
@@ -41,8 +39,8 @@ namespace API_Project.Migrations
                 name: "InterestPerson",
                 columns: table => new
                 {
-                    Interestsid = table.Column<int>(type: "int", nullable: false),
-                    Peopleid = table.Column<int>(type: "int", nullable: false)
+                    Interestsid = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Peopleid = table.Column<string>(type: "nvarchar(450)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -67,9 +65,9 @@ namespace API_Project.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Link = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Interestid = table.Column<int>(type: "int", nullable: true),
-                    Personid = table.Column<int>(type: "int", nullable: true)
+                    WebLink = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Interestid = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    Personid = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
                 constraints: table =>
                 {
