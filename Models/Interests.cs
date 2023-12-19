@@ -1,8 +1,12 @@
-﻿namespace API_Project.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace API_Project.Models
 {
+    // Specify the table name as it's called "Interests" in ApplicationContext
+    [Table("interest")]
     public class Interest
     {
-        public string id { get; set; }
+        public string Id { get; set; }
         public string Title { get; set; }
         public string? Description { get; set; }
 
