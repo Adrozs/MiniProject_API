@@ -8,7 +8,7 @@ namespace API_Project
     public static class PeopleHandler
     {
         // Gets all people names and id's in the database
-        public static List<PeopleViewModel> GetPeopleNames(ApplicationContext context)
+        public static IResult GetPeopleNames(ApplicationContext context)
         {
             var people = context.People
                 .Select(p => new PeopleViewModel()
@@ -17,12 +17,15 @@ namespace API_Project
                     Name = $"{p.FirstName} {p.LastName}"
                 })
                 .ToList();
-            
-            return people;
+
+            if (people != null)
+                return Results.NotFound("Error. No person found.");
+
+            return Results.Json(people);
         }
 
-        // Gets all interests in the database and their ids
-        public static List<InterestViewModel> GetInterests(ApplicationContext context)
+        // Gets all interests and their ids in the database 
+        public static IResult GetInterests(ApplicationContext context)
         {
             var interests = context.Interests
                 .Select(p => new InterestViewModel()
@@ -32,7 +35,10 @@ namespace API_Project
                 })
                 .ToList();
 
-            return interests;
+            if (interests == null)
+                return Results.NotFound("Error. No interests found.");
+
+            return Results.Json(interests);
         }
 
         // Gets all interests from a specific person
@@ -40,16 +46,16 @@ namespace API_Project
         {
             // Check if ID exists in the db
             if (!DbHelper.CheckValidId(context, personId))
-                return Results.NotFound("Error, person not found.");
+                return Results.NotFound($"Error. Person \"{personId}\" not found.");
 
-            // Get out the person and their interests
+            // Get the person and their interests
             var person = context.People
                 .Include(p => p.Interests)
                 .SingleOrDefault(p => p.Id == personId);
             
             // Make sure the person has interests and that they're not null
             if (person.Interests == null || !person.Interests.Any())
-                return Results.NotFound("Error, no interests found for the person.");
+                return Results.NotFound($"Error. No interests found for \"{person.Id}\".");
 
 
             List<InterestPersonViewModel> personInterests =
@@ -71,20 +77,30 @@ namespace API_Project
             string lastName = name.Split('-')[1];
             string id = string.Join(' ', firstName[0], firstName[1], firstName[2], lastName[0], lastName[1], lastName[2]).Trim();
 
-            Person person = new Person();
-            person.Id = id;
-            person.FirstName = firstName;
-            person.LastName = lastName;
+            Person person = new Person()
+            {
+                Id = id,
+                FirstName = firstName,
+                LastName = lastName,
+            };
 
-            context.People.Add(person);
-            context.SaveChanges();
+            try
+            {
+                context.People.Add(person);
+                context.SaveChanges();
 
-            // Check if adding to the database was succesful.
-            // return Results.Problem or maybe Results.ValidationError if unsucesful
+                // Check if adding to the database was succesful.
+                // return Results.Problem or maybe Results.ValidationError if unsucesful
 
-            return Results.Ok();
+                return Results.Ok();
+            }
+            catch (Exception ex)
+            {
+                return Results.StatusCode(500);
+            }
         }
 
+        // Connect a person to a new interest
         public static IResult AddPersonInterest(ApplicationContext context, string personId, string interestId)
         {
             // Check if person already has interest with any and return already exists something
@@ -108,9 +124,14 @@ namespace API_Project
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
                 return Results.StatusCode(500);
             }
+        }
+
+        // Add new links for a specific person and a specific interest
+        public static IResult AddInterestLink(ApplicationContext context, string personId, string interestId)
+        {
+            // we need to send in the link via the API "body" as a json object and then convert it to a string?
         }
     }
 }

@@ -19,45 +19,19 @@ namespace API_Project
             "Here are the available GET commands:\n" +  
             "/people - Displays all student names\n" +
             "/interests - Displays all interests\n" +
-            "/interests/people/[personId] - Displays all interests for specified student\n\n" +
+            "/people/[personId]/interests - Displays all interests for specified student\n\n" +
             "Here are the available POST commands:\n" +
-            "/people/{personId}/interests/{interestId} - Add an existing interest to a user\n");
+            "/people/[personId]/interests/[interestId] - Add an existing interest to a user\n");
 
-            // Get all people in the database
-            app.MapGet("/people", (ApplicationContext context) =>
-            {
-                var people = PeopleHandler.GetPeopleNames(context);
 
-                if (people == null)
-                    return Results.NotFound();
-                
-                return Results.Ok(people);
-            });
-
-            // Get all interest in the database
-            app.MapGet("/interests", (ApplicationContext context) =>
-            {
-                var interests = PeopleHandler.GetInterests(context);
-
-                if (interests == null)
-                    return Results.NotFound();
-
-                return Results.Ok(interests);
-            });
-
-            app.MapGet("/interests/people/{personId}", PeopleHandler.GetPersonInterests);
-
-            // Connect a person to a new interest
-            app.MapPost("/people/{personId}/interests/{interestId}", (ApplicationContext context, string personId, string interestId) =>
-            {
-                return PeopleHandler.AddPersonInterest(context, personId, interestId);
-            });
-
-            // Add new links for a specific person and a specific interest
-            //app.MapPost("/people/{personId}/interests/{interestId}/link/", (ApplicationContext context, string personId, string interestId, jhjss link) =>
-            //{
-            //    // create link data object and send in as link in the post body
-            //});
+            app.MapGet("/people", PeopleHandler.GetPeopleNames);
+            app.MapGet("/interests", PeopleHandler.GetInterests);            
+            app.MapGet("/people/{personId}/interests", PeopleHandler.GetPersonInterests);
+            app.MapPost("/people/{personId}/interests/{interestId}", PeopleHandler.AddPersonInterest);
+            app.MapPost("/people/{personId}/interests/{interestId}/link/", (ApplicationContext context, string personId, string interestId, jhjss link) =>
+           {
+               // create link data object and send in as link in the post body
+           });
 
             app.Run();
 
