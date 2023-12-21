@@ -1,53 +1,110 @@
 ﻿using API_Project.Data;
 using API_Project.Models;
+using API_Project.ViewModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace API_Project
 {
     public class PeopleHandler
     {
-        public static List<string> GetPeopleNames(ApplicationContext context)
+        // Gets all people names and id's in the database
+        public static List<PeopleViewModel> GetPeopleNames(ApplicationContext context)
         {
             var people = context.People
-            .Select(p => $"{p.FirstName} {p.LastName}")
-            .ToList();
-
+                .Select(p => new PeopleViewModel()
+                {
+                    Id = p.Id,
+                    Name = $"{p.FirstName} {p.LastName}"
+                })
+                .ToList();
+            
             return people;
         }
 
-        public static List<string> GetInterests(ApplicationContext context)
+        // Gets all interests in the database and their ids
+        public static List<InterestViewModel> GetInterests(ApplicationContext context)
         {
             var interests = context.Interests
-                .Select(i => i.Title ) 
+                .Select(p => new InterestViewModel()
+                {
+                    Id = p.Id,
+                    Title = p.Title,
+                })
                 .ToList();
 
             return interests;
         }
 
-        // Using object for dynamic projection of the "interest" properties 
-        public static List<object> GetPersonInterests(ApplicationContext context, string name)
+        // Gets all interests from a specific person
+        public static List<InterestPersonViewModel> GetPersonInterests(ApplicationContext context, string personId)
         {
-            string personId = DbHelper.GetPersonId(context, name);
+            if(DbHelper.CheckValidId(context, personId))
+            {
+                var personInterests = context.People
+               .Where(p => p.Id == personId)
+               .Single()
+               .Interests
+               .Select(i => new InterestPersonViewModel()
+               {
+                   Title = i.Title,
+                   Description = i.Description
+               })
+               .ToList();
 
-            var personInterests = context.People
-                .Where(p => p.Id == personId)
-                .SelectMany(p => p.Interests)
-                .Select(i => new
-                {
-                    i.Title,
-                    i.Description
-                })
-                .ToList<object>();
+                return personInterests;
+            }
 
-            return personInterests;
+            return null;
+           
         }
 
-        public static void AddPersonInterest(ApplicationContext context, string name, string interest)
+        // Create new person in the database based on a name
+        public static IResult AddPerson(ApplicationContext context, string name)
         {
-            string personId = DbHelper.GetPersonId(context, name);
-            string interestId = DbHelper.GetInterestId(context, interest);
+            string firstName = name.Split('-')[0];
+            string lastName = name.Split('-')[1];
+            string id = string.Join(' ', firstName[0], firstName[1], firstName[2], lastName[0], lastName[1], lastName[2]).Trim();
 
-            
+            Person person = new Person();
+            person.Id = id;
+            person.FirstName = firstName;
+            person.LastName = lastName;
+
+            context.People.Add(person);
+            context.SaveChanges();
+
+            // Check if adding to the database was succesful.
+            // return Results.Problem or maybe Results.ValidationError if unsucesful
+
+            return Results.Ok();
+        }
+
+        public static IResult AddPersonInterest(ApplicationContext context, string personId, string interestId)
+        {
+            // Check if person already has interest with any and return already exists something
+
+            var interest = context.Interests
+                .Where(i => i.Id == interestId)
+                .Single();
+
+            try
+            {
+                context.People
+                    .Where(p => p.Id == personId)
+                    .Include(p => p.Interests)
+                    .Single()
+                    .Interests
+                    .Add(interest);
+
+                context.SaveChanges();
+
+                return Results.Ok();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return Results.StatusCode(500);
+            }
         }
     }
 }

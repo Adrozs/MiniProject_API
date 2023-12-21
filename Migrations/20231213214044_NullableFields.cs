@@ -23,7 +23,7 @@ namespace API_Project.Migrations
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(max)");
-        }
+        }   
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {

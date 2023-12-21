@@ -15,11 +15,12 @@ namespace API_Project
             var app = builder.Build();
 
             app.MapGet("/", () => "Welcome to Canvas, the ChasAcademy teaching platform!\n\n" +
-            "Here are the available commands:\n" +
+            "Here are the available GET commands:\n" +  
             "/people - Displays all student names\n" +
             "/interests - Displays all interests\n" +
-            "/interests/[full name] - Displays all interests for specified student\n" +
-            "/interests/[full name] [interest] [link] - Adds the sent in link to the interest for the selected student");
+            "/interests/people/[personId] - Displays all interests for specified student\n\n" +
+            "Here are the available POST commands:\n" +
+            "/people/{personId}/interests/{interestId} - Add an existing interest to a user\n");
 
             // Get all people in the database
             app.MapGet("/people", (ApplicationContext context) =>
@@ -27,7 +28,7 @@ namespace API_Project
                 var people = PeopleHandler.GetPeopleNames(context);
 
                 if (people == null)
-                    return Results.NoContent();
+                    return Results.NotFound();
                 
                 return Results.Ok(people);
             });
@@ -38,35 +39,33 @@ namespace API_Project
                 var interests = PeopleHandler.GetInterests(context);
 
                 if (interests == null)
-                    return Results.NoContent();
+                    return Results.NotFound();
 
                 return Results.Ok(interests);
             });
 
             // Get all interest connected to a specific person
-            app.MapGet("/interests/{name}", (ApplicationContext context, string name) =>
+            app.MapGet("/interests/people/{personId}", (ApplicationContext context, string personId) =>
             {
-                var interests = PeopleHandler.GetPersonInterests(context, name);
+                var interests = PeopleHandler.GetPersonInterests(context, personId);
 
                 if (interests == null)
-                    return Results.NoContent();
+                    return Results.NotFound();
 
                 return Results.Ok(interests);
             });
 
             // Connect a person to a new interest
-            app.MapPost("/interests/{name} {interest}", (ApplicationContext context, string name, string interest) =>
+            app.MapPost("/people/{personId}/interests/{interestId}", (ApplicationContext context, string personId, string interestId) =>
             {
-
+                return PeopleHandler.AddPersonInterest(context, personId, interestId);
             });
 
             // Add new links for a specific person and a specific interest
-            app.MapPost("/interests/{name} {interest} {link}", (ApplicationContext context, string name, string interest, string link) =>
+            app.MapPost("/people/{personId}/interests/{interestId}/link/", (ApplicationContext context, string personId, string interestId, jhjss link) =>
             {
-
+                // create link data object and send in as link in the post body
             });
-
-
 
             app.Run();
 
