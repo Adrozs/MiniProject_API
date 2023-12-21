@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API_Project
 {
-    public class PeopleHandler
+    public static class PeopleHandler
     {
         // Gets all people names and id's in the database
         public static List<PeopleViewModel> GetPeopleNames(ApplicationContext context)
@@ -36,26 +36,32 @@ namespace API_Project
         }
 
         // Gets all interests from a specific person
-        public static List<InterestPersonViewModel> GetPersonInterests(ApplicationContext context, string personId)
+        public static IResult GetPersonInterests(ApplicationContext context, string personId)
         {
-            if(DbHelper.CheckValidId(context, personId))
-            {
-                var personInterests = context.People
-               .Where(p => p.Id == personId)
-               .Single()
-               .Interests
-               .Select(i => new InterestPersonViewModel()
-               {
-                   Title = i.Title,
-                   Description = i.Description
-               })
-               .ToList();
+            // Check if ID exists in the db
+            if (!DbHelper.CheckValidId(context, personId))
+                return Results.NotFound("Error, person not found.");
 
-                return personInterests;
-            }
+            // Get out the person and their interests
+            var person = context.People
+                .Include(p => p.Interests)
+                .SingleOrDefault(p => p.Id == personId);
+            
+            // Make sure the person has interests and that they're not null
+            if (person.Interests == null || !person.Interests.Any())
+                return Results.NotFound("Error, no interests found for the person.");
 
-            return null;
-           
+
+            List<InterestPersonViewModel> personInterests =
+                person.Interests
+                .Select(i => new InterestPersonViewModel()
+                {
+                    Title = i.Title,
+                    Description = i.Description,
+                })
+                .ToList();
+
+            return Results.Json(personInterests);
         }
 
         // Create new person in the database based on a name

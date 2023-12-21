@@ -14,6 +14,7 @@ namespace API_Project
             builder.Services.AddDbContext<ApplicationContext>(options => options.UseSqlServer(connectionString));
             var app = builder.Build();
 
+            // Introduction text and instructions on the root page
             app.MapGet("/", () => "Welcome to Canvas, the ChasAcademy teaching platform!\n\n" +
             "Here are the available GET commands:\n" +  
             "/people - Displays all student names\n" +
@@ -44,16 +45,7 @@ namespace API_Project
                 return Results.Ok(interests);
             });
 
-            // Get all interest connected to a specific person
-            app.MapGet("/interests/people/{personId}", (ApplicationContext context, string personId) =>
-            {
-                var interests = PeopleHandler.GetPersonInterests(context, personId);
-
-                if (interests == null)
-                    return Results.NotFound();
-
-                return Results.Ok(interests);
-            });
+            app.MapGet("/interests/people/{personId}", PeopleHandler.GetPersonInterests);
 
             // Connect a person to a new interest
             app.MapPost("/people/{personId}/interests/{interestId}", (ApplicationContext context, string personId, string interestId) =>
@@ -62,10 +54,10 @@ namespace API_Project
             });
 
             // Add new links for a specific person and a specific interest
-            app.MapPost("/people/{personId}/interests/{interestId}/link/", (ApplicationContext context, string personId, string interestId, jhjss link) =>
-            {
-                // create link data object and send in as link in the post body
-            });
+            //app.MapPost("/people/{personId}/interests/{interestId}/link/", (ApplicationContext context, string personId, string interestId, jhjss link) =>
+            //{
+            //    // create link data object and send in as link in the post body
+            //});
 
             app.Run();
 
