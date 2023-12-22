@@ -7,6 +7,7 @@ namespace API_Project.Data
     {
         public DbSet<Person> People { get; set; }
         public DbSet<Interest> Interests { get; set; }
+        public DbSet<InterestsLink> InterestsLinks { get; set; }
 
         public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options) { }
 
