@@ -1,5 +1,7 @@
 using API_Project.Data;
+using API_Project.Handlers;
 using API_Project.Models;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
 
@@ -15,23 +17,34 @@ namespace API_Project
             var app = builder.Build();
 
             // Introduction text and instructions on the root page
-            app.MapGet("/", () => "Welcome to Canvas, the ChasAcademy teaching platform!\n\n" +
+            app.MapGet("/", () => "Welcome to CATPAPI, the ChasAcademy Teaching Platform API!\n\n" +
+            "How to use CATPAPI:\n" +
+            "-{} brackets are where you fill out data\n" +
+            "-Search is ID-based. So students and interests are searched by ID, not by name.\n" +
+            "-Student IDs are the first 3 letters of their first- and last names (Bilbo Baggins = BILBAG)\n" +
+            "-Interest IDs are the first 3 letters (Golf = GOL)\n\n" +
             "Here are the available GET commands:\n" +  
-            "/people - Displays all student names\n" +
-            "/interests - Displays all interests\n" +
-            "/people/[personId]/interests - Displays all interests for specified student\n\n" +
+            "/people - Displays all student names and their IDs\n" +
+            "/people/{search} - Displays all students whose name starts with the search\n" +
+            "/interests - Displays all interests and their IDs\n" +
+            "/interests/{search} - Displays all interests whose title starts with the search\n" +
+            "/people/{personId}/interests - Displays all interests for the chosen student\n" +
+            "/people/{personId}/interests/links - Display all interest links connected to a student\n\n" +
             "Here are the available POST commands:\n" +
-            "/people/[personId]/interests/[interestId] - Add an existing interest to a user\n");
+            "/people/ - Add a new student\n" +
+            "/interests - Add a new interest\n" +
+            "/people/{personId}/interests/{interestId} - Connect a student to an existing interest\n" +
+            "/people/{personId}/interests/{interestId}/links/ - Add a link to a student and their chosen interest\n");
 
 
-            app.MapGet("/people", PeopleHandler.GetPeopleNames);
-            app.MapGet("/interests", PeopleHandler.GetInterests);            
-            app.MapGet("/people/{personId}/interests", PeopleHandler.GetPersonInterests);
-            app.MapPost("/people/{personId}/interests/{interestId}", PeopleHandler.AddPersonInterest);
-            app.MapPost("/people/{personId}/interests/{interestId}/link/", (ApplicationContext context, string personId, string interestId, jhjss link) =>
-           {
-               // create link data object and send in as link in the post body
-           });
+            app.MapGet("/people/{search?}", PeopleHandler.GetPeople);
+            app.MapPost("/people", PeopleHandler.AddPerson);
+            app.MapGet("/interests/{search?}", InterestsHandler.GetInterests);
+            app.MapPost("/interests", InterestsHandler.AddInterest);
+            app.MapGet("/people/{personId}/interests", InterestsHandler.GetPersonInterests);
+            app.MapPost("/people/{personId}/interests/{interestId}", PeopleHandler.ConnectPersonToInterest);
+            app.MapPost("/people/{personId}/interests/{interestId}/links/", InterestsHandler.AddInterestLink);
+            app.MapGet("/people/{personId}/interests/links", PeopleHandler.GetPersonLinks);
 
             app.Run();
 
@@ -41,18 +54,22 @@ namespace API_Project
 
             // [x] Get all interest connected to a specific person
 
-            // [] Connect a person to a new interest
+            // [x] Connect a person to a new interest
 
-            // [] Add new links for a specific person and a specific interest
+            // [x] Add new links for a specific person and a specific interest
+
+            // [x] Get all links that are connected to a specific person
 
             // EXTRA CHALLENGES
             // [] Give the option for the one calling the API and asking for a person to get out all interests
-            // and all links for that person directly in a heirical JSON-file
+            // and all links for that person directly in a hierarchical JSON-file
 
-            // [] Give the option for the one calling the API to filter what they get back, like a search.
+            // [x] Give the option for the one calling the API to filter what they get back, like a search.
             // For example if we send "to" when getting all people in the database we should get back everyone that
             // has a "to" in their name, like "Tobias or "Tomas". 
             // This you can create for all calls (anrop) if you want.
+            // [] Add search to more methods?
+
 
             // [] Create paginering of the calls (anrop). When we call for example people we maybe get the first
             // 100 people and have to call more time to get more people. 
