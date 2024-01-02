@@ -1,4 +1,6 @@
-﻿namespace API_Project.Handlers
+﻿using API_Project.Models;
+
+namespace API_Project.Handlers
 {
     public class Utility
     {
@@ -14,5 +16,11 @@
         {
             return string.Join(' ', title[0], title[1], title[2]).Trim();
         }
+
+        public static string GetName(Person person)
+        {
+            return $"{person.FirstName} {person.LastName}";
+    }
+}
     }
 }
