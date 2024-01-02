@@ -20,7 +20,8 @@ namespace API_Project
             app.MapGet("/", () => "Welcome to CATPAPI, the ChasAcademy Teaching Platform API!\n\n" +
             "How to use CATPAPI:\n" +
             "-{} brackets are where you fill out data\n" +
-            "-Search is ID-based. So students and interests are searched by ID, not by name.\n" +
+            "-{search?} means it's optional\n" +
+            "-Search works by typing ex: \"/people/Ad\" and you'll get all students whose names start with \"Ad\" .\n" +
             "-Student IDs are the first 3 letters of their first- and last names (Bilbo Baggins = BILBAG)\n" +
             "-Interest IDs are the first 3 letters (Golf = GOL)\n\n" +
             "Here are the available GET commands:\n" +  
@@ -41,7 +42,7 @@ namespace API_Project
             app.MapPost("/people", PeopleHandler.AddPerson);
             app.MapGet("/interests/{search?}", InterestsHandler.GetInterests);
             app.MapPost("/interests", InterestsHandler.AddInterest);
-            app.MapGet("/people/{personId}/interests", InterestsHandler.GetPersonInterests);
+            app.MapGet("/people/{personId}/interests/{search?}", InterestsHandler.GetPersonInterests);
             app.MapPost("/people/{personId}/interests/{interestId}", PeopleHandler.ConnectPersonToInterest);
             app.MapPost("/people/{personId}/interests/{interestId}/links/", InterestsHandler.AddInterestLink);
             app.MapGet("/people/{personId}/interests/links", PeopleHandler.GetPersonLinks);
@@ -68,7 +69,7 @@ namespace API_Project
             // For example if we send "to" when getting all people in the database we should get back everyone that
             // has a "to" in their name, like "Tobias or "Tomas". 
             // This you can create for all calls (anrop) if you want.
-            // [] Add search to more methods?
+            // [x] Add search to more methods?
 
 
             // [] Create paginering of the calls (anrop). When we call for example people we maybe get the first
