@@ -11,48 +11,68 @@ namespace API_Project.Handlers
 {
     public static class PeopleHandler
     {
-        // Gets all/searched people names and id's 
-        public static IResult GetPeople(ApplicationContext context, string? search)
+        // Gets all/searched people names and id's w/ optional pagination
+        public static IResult GetPeople(ApplicationContext context, int? page, int? results, string? search)
         {
             try
             {
-                // Check if user sent in a search query or not
-                if (string.IsNullOrEmpty(search))
+                if (page < 1)
+                    return Results.BadRequest("Invalid page number.");
+
+                if (results < 1)
+                    return Results.BadRequest("Invalid page size.");
+
+
+                // Get all people
+                var people = context.People
+                .Select(p => new PeopleViewModel()
                 {
-                    // Get all people
-                    List<PeopleViewModel> people = context.People
-                    .Select(p => new PeopleViewModel()
-                    {
-                        Id = p.Id,
-                        Name = $"{p.FirstName} {p.LastName}"
-                    })
-                    .ToList();
+                    Id = p.Id,
+                    Name = $"{p.FirstName} {p.LastName}"
+                });
 
-                    if (people == null || !people.Any())
-                        return Results.NotFound("Error. No person found.");
 
-                    return Results.Json(people);
-                }
-                else
+                // If a search was made 
+                if (!string.IsNullOrEmpty(search))
                 {
                     // Get all people matching search
-                    List<PeopleViewModel> people = context.People
-                    .Select(p => new PeopleViewModel()
-                    {
-                        Id = p.Id,
-                        Name = $"{p.FirstName} {p.LastName}"
-                    })
-                    .Where(p => p.Name
-                    .StartsWith(search))
+                    people = context.People
+                        .Where(p => (p.FirstName + " " + p.LastName).StartsWith(search))
+                        .Select(p => new PeopleViewModel 
+                        {
+                            Id = p.Id,
+                            Name = $"{p.FirstName} {p.LastName}"
+                        });
+                }
+
+
+                // Set default values for pagination if no value was sent in
+                if (page == null)
+                    page = 1;
+
+                if (results == null)
+                    results = people.Count();
+
+                // Calculate the number of items to skip and take based on values sent in
+                int skip = (int)((page - 1) * results);
+                int take = (int)(results);
+
+
+                // Add pagination and save result
+                List<PeopleViewModel> result = 
+                    people
+                    .Skip(skip)
+                    .Take(take)
                     .ToList();
 
-                    Console.WriteLine(people);
 
-                    if (people == null || !people.Any())
-                        return Results.NotFound($"Error. No person found whose name starts with {search}");
+                    if (result == null || !result.Any())
+                        return Results.NotFound(string.IsNullOrEmpty(search)
+                            ?"Error no people found"
+                            :$"Error. No person found whose name starts with {search}");
 
-                    return Results.Json(people);
-                }  
+                return Results.Json(result);
+                
             }
             catch (Exception ex)
             {
