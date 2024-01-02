@@ -4,6 +4,7 @@ using API_Project.Models;
 using API_Project.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 
 namespace API_Project.Handlers
@@ -89,26 +90,31 @@ namespace API_Project.Handlers
         public static IResult ConnectPersonToInterest(ApplicationContext context, string personId, string interestId)
         {
             try
-            {
-                // TODO: Check if person already has interest with any and return already exists something
-                // Maybe make a method in DbHelper to do it
-                
-                
+            {               
+                // Get the interest
                 Interest interest = context.Interests
                     .Where(i => i.Id == interestId)
                     .Single();
 
-            
-                context.People
+                // Get person and their interests
+                var person = context.People
                     .Where(p => p.Id == personId)
                     .Include(p => p.Interests)
-                    .Single()
-                    .Interests
-                    .Add(interest);
+                    .Single();
 
+                // Check if person already has that interest linked to them
+                if (person.Interests.Contains(interest))
+                {
+                    return Results.Text($"{Utility.GetName(person)} already has the interest {interest.Title}");
+                }
+
+
+                person
+                .Interests
+                .Add(interest);
                 context.SaveChanges();
 
-                return Results.Ok();
+                return Results.Ok($"Interest {interest.Title} added to {Utility.GetName(person)}");
             }
             catch (Exception ex)
             {
