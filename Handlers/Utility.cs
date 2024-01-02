@@ -20,7 +20,7 @@ namespace API_Project.Handlers
         public static string GetName(Person person)
         {
             return $"{person.FirstName} {person.LastName}";
+        }
     }
 }
-    }
-}
+
