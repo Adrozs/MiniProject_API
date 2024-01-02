@@ -59,34 +59,34 @@ namespace API_Project.Handlers
         }
 
 
-        // Gets all interests and id's whose title starts with the sent in search string
-        public static IResult GetInterestsSearch(ApplicationContext context, string search)
-        {
-            try
-            {
-                List<InterestViewModel> interests = context.Interests
-                    .Select(i => new InterestViewModel()
-                    {
-                        Id = i.Id,
-                        Title = i.Title,
-                    })
-                    .Where(i => i.Title
-                    .StartsWith(search))
-                    .ToList();
+        //// Gets all interests and id's whose title starts with the sent in search string
+        //public static IResult GetInterestsSearch(ApplicationContext context, string search)
+        //{
+        //    try
+        //    {
+        //        List<InterestViewModel> interests = context.Interests
+        //            .Select(i => new InterestViewModel()
+        //            {
+        //                Id = i.Id,
+        //                Title = i.Title,
+        //            })
+        //            .Where(i => i.Title
+        //            .StartsWith(search))
+        //            .ToList();
 
-                Console.WriteLine(interests);
+        //        Console.WriteLine(interests);
 
-                if (interests == null || !interests.Any())
-                    return Results.NotFound($"Error. No interests found whose title starts with {search}");
+        //        if (interests == null || !interests.Any())
+        //            return Results.NotFound($"Error. No interests found whose title starts with {search}");
 
-                return Results.Json(interests);
+        //        return Results.Json(interests);
 
-            }
-            catch (Exception ex)
-            {
-                return Results.Text($"An error occurred: {ex.Message}");
-            }
-        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return Results.Text($"An error occurred: {ex.Message}");
+        //    }
+        //}
 
 
         // Add new interest to the database
@@ -114,23 +114,26 @@ namespace API_Project.Handlers
 
 
         // Gets all interests from a specific person
-        public static IResult GetPersonInterests(ApplicationContext context, string personId)
+        public static IResult GetPersonInterests(ApplicationContext context, string personId, string? search)
         {
             try 
             { 
                 if (!DbHelper.PersonExists(context, personId))
                     return Results.NotFound($"Error. Person \"{personId}\" not found.");
 
-                var person = context.People
-                    .Include(p => p.Interests)
-                    .SingleOrDefault(p => p.Id == personId);
+                Person person = context.People
+                        .Include(p => p.Interests)
+                        .SingleOrDefault(p => p.Id == personId);
 
                 // Make sure the person has interests and that they're not null
                 if (person.Interests == null || !person.Interests.Any())
                     return Results.NotFound($"Error. No interests found for \"{person.Id}\".");
 
-
-                List<InterestPersonViewModel> personInterests =
+                // Checks if there was a search made or not
+                if (string.IsNullOrEmpty(search))
+                {
+                    // Gets all interests for the person
+                    List<InterestPersonViewModel> personInterests =
                     person.Interests
                     .Select(i => new InterestPersonViewModel()
                     {
@@ -139,14 +142,30 @@ namespace API_Project.Handlers
                     })
                     .ToList();
 
-                return Results.Json(personInterests);
+                    return Results.Json(personInterests);
+                }
+                else
+                {
+                    // Gets all interests for the person matching the search
+                    List<InterestPersonViewModel> personInterests =
+                    person.Interests
+                    .Select(i => new InterestPersonViewModel()
+                    {
+                        Title = i.Title,
+                        Description = i.Description,
+                    })
+                    .Where(i => i.Title
+                    .StartsWith(search))
+                    .ToList();
+
+                    return Results.Json(personInterests);
+                }
             }
             catch (Exception ex)
             {
                 return Results.Text($"An error occurred: {ex.Message}");
             }
-
-}
+        }
 
 
         // Add new links for a specific person and a specific interest
