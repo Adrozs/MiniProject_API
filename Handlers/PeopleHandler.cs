@@ -40,7 +40,7 @@ namespace API_Project.Handlers
                     .Select(p => new PeopleViewModel()
                     {
                         Id = p.Id,
-                        Name = p.FirstName + " " + p.LastName,
+                        Name = $"{p.FirstName} {p.LastName}"
                     })
                     .Where(p => p.Name
                     .StartsWith(search))
@@ -91,7 +91,7 @@ namespace API_Project.Handlers
         {
             try
             {               
-                // Get the interest
+                // Get the interest 
                 Interest interest = context.Interests
                     .Where(i => i.Id == interestId)
                     .Single();
