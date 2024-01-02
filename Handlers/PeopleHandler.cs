@@ -3,9 +3,6 @@ using API_Project.DTO;
 using API_Project.Models;
 using API_Project.ViewModels;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 
 namespace API_Project.Handlers
 {

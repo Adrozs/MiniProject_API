@@ -1,9 +1,6 @@
 using API_Project.Data;
 using API_Project.Handlers;
-using API_Project.Models;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
-using System.Net;
 
 namespace API_Project
 {
