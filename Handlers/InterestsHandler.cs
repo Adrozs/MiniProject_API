@@ -58,37 +58,6 @@ namespace API_Project.Handlers
             }
         }
 
-
-        //// Gets all interests and id's whose title starts with the sent in search string
-        //public static IResult GetInterestsSearch(ApplicationContext context, string search)
-        //{
-        //    try
-        //    {
-        //        List<InterestViewModel> interests = context.Interests
-        //            .Select(i => new InterestViewModel()
-        //            {
-        //                Id = i.Id,
-        //                Title = i.Title,
-        //            })
-        //            .Where(i => i.Title
-        //            .StartsWith(search))
-        //            .ToList();
-
-        //        Console.WriteLine(interests);
-
-        //        if (interests == null || !interests.Any())
-        //            return Results.NotFound($"Error. No interests found whose title starts with {search}");
-
-        //        return Results.Json(interests);
-
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return Results.Text($"An error occurred: {ex.Message}");
-        //    }
-        //}
-
-
         // Add new interest to the database
         public static IResult AddInterest(ApplicationContext context, string name, InterestDto interestDto)
         {
