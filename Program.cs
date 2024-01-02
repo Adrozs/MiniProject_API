@@ -37,16 +37,23 @@ namespace API_Project
             "/people/{personId}/interests/{interestId} - Connect a student to an existing interest\n" +
             "/people/{personId}/interests/{interestId}/links/ - Add a link to a student and their chosen interest\n");
 
-
+            // People commands
             app.MapGet("/people/{search?}", PeopleHandler.GetPeople);
+            app.MapGet("/people/page/{page?}/results/{results?}/{search?}", PeopleHandler.GetPeople);
             app.MapPost("/people", PeopleHandler.AddPerson);
+
+            // Interests commands
             app.MapGet("/interests/{search?}", InterestsHandler.GetInterests);
             app.MapPost("/interests", InterestsHandler.AddInterest);
+
+            // People interest commands
             app.MapGet("/people/{personId}/interests/{search?}", InterestsHandler.GetPersonInterests);
             app.MapPost("/people/{personId}/interests/{interestId}", PeopleHandler.ConnectPersonToInterest);
-            app.MapPost("/people/{personId}/interests/{interestId}/links/", InterestsHandler.AddInterestLink);
-            app.MapGet("/people/{personId}/interests/links", PeopleHandler.GetPersonLinks);
 
+            // Interests link commands
+            app.MapGet("/people/{personId}/interests/links", PeopleHandler.GetPersonLinks);
+            app.MapPost("/people/{personId}/interests/{interestId}/links/", InterestsHandler.AddInterestLink);
+            
             app.Run();
 
 
@@ -72,7 +79,7 @@ namespace API_Project
             // [x] Add search to more methods?
 
 
-            // [] Create paginering of the calls (anrop). When we call for example people we maybe get the first
+            // [x] Create paginering of the calls (anrop). When we call for example people we maybe get the first
             // 100 people and have to call more time to get more people. 
             // Here it could be nice that the call decides how many people we get in a call, so we can choose to get
             // say 10 people if we just want that.
