@@ -58,7 +58,7 @@ namespace API_Project.Handlers
             }
         }
 
-        // Add new interest to the database
+
         public static IResult AddInterest(ApplicationContext context, string name, InterestDto interestDto)
         {
             try
@@ -73,7 +73,7 @@ namespace API_Project.Handlers
                 context.Interests.Add(interest);
                 context.SaveChanges();
 
-                return Results.Ok();
+                return Results.StatusCode((int)HttpStatusCode.Created);
             }
             catch (Exception ex)
             {
@@ -82,7 +82,6 @@ namespace API_Project.Handlers
         }
 
 
-        // Gets all interests from a specific person
         public static IResult GetPersonInterests(ApplicationContext context, string personId, string? search)
         {
             try 
@@ -92,16 +91,19 @@ namespace API_Project.Handlers
 
                 Person person = context.People
                         .Include(p => p.Interests)
-                        .SingleOrDefault(p => p.Id == personId);
+                        .Where(p => p.Id == personId)
+                        .Single();
+
 
                 // Make sure the person has interests and that they're not null
                 if (person.Interests == null || !person.Interests.Any())
                     return Results.NotFound($"Error. No interests found for \"{person.Id}\".");
 
-                // Checks if there was a search made or not
+
+                // Checks if there wasn't a search made an gets all interests for the person
                 if (string.IsNullOrEmpty(search))
                 {
-                    // Gets all interests for the person
+                    
                     List<InterestPersonViewModel> personInterests =
                     person.Interests
                     .Select(i => new InterestPersonViewModel()
@@ -113,9 +115,9 @@ namespace API_Project.Handlers
 
                     return Results.Json(personInterests);
                 }
+                // If a search was made get all interests for the person matching the search
                 else
                 {
-                    // Gets all interests for the person matching the search
                     List<InterestPersonViewModel> personInterests =
                     person.Interests
                     .Select(i => new InterestPersonViewModel()
@@ -137,7 +139,6 @@ namespace API_Project.Handlers
         }
 
 
-        // Add new links for a specific person and a specific interest
         public static IResult AddInterestLink(ApplicationContext context, string personId, string interestId, InterestLinkDto interestLink)
         {
             try
@@ -149,21 +150,30 @@ namespace API_Project.Handlers
                 if (!DbHelper.InterestExists(context, interestId))
                     return Results.NotFound($"Error. Interest \"{interestId}\" not found.");
 
-                Person person = context.People.Where(p => p.Id == personId)
+
+                // Get person and interest
+
+                Person person = 
+                    context.People
+                    .Where(p => p.Id == personId)
                     .Single();
 
-                Interest interest = context.Interests.Where(i => i.Id == interestId)
+                Interest interest = 
+                    context.Interests
+                    .Where(i => i.Id == interestId)
                     .Single();
 
-                // Add link and the id's to the InterestLink table
-                context.InterestsLinks.Add(new InterestsLink()
-                {
-                    WebLink = interestLink.WebLink,
-                    Person = person,
-                    Interests = interest
 
-                });
-                context.SaveChanges();
+                // Add link and the objects to the InterestLink table
+                context.InterestsLinks
+                    .Add(new InterestsLink()
+                    {
+                        WebLink = interestLink.WebLink,
+                        Person = person,
+                        Interests = interest
+
+                    });
+                    context.SaveChanges();
 
                 return Results.StatusCode((int)HttpStatusCode.Created);
             }
