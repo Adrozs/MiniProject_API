@@ -15,15 +15,15 @@ namespace API_Project.Handlers
         }
 
 
-        public static string GetInterestId(ApplicationContext context, string interest)
-        {
-            // Get id from the name
-            string interestId = context.Interests
-                .Where(i => i.Title == interest)
-                .Select(i => i.Id)
-                .Single();
+        //public static string GetInterestId(ApplicationContext context, string interest)
+        //{
+        //    // Get id from the name
+        //    string interestId = context.Interests
+        //        .Where(i => i.Title == interest)
+        //        .Select(i => i.Id)
+        //        .Single();
 
-            return interestId;
-        }
+        //    return interestId;
+        //}
     }
 }
