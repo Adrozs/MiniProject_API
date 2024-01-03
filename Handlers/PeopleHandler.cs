@@ -3,6 +3,7 @@ using API_Project.DTO;
 using API_Project.Models;
 using API_Project.ViewModels;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace API_Project.Handlers
 {
@@ -13,73 +14,84 @@ namespace API_Project.Handlers
         {
             try
             {
-                if (page < 1)
-                    return Results.BadRequest("Invalid page number.");
-
-                if (results < 1)
-                    return Results.BadRequest("Invalid page size.");
+                // Check if page or result is less than 1 return error message depending on which one was true
+                if (page < 1 || results < 1)
+                    return Results.BadRequest(page < 1
+                         ? "Invalid page number."
+                        :$"Invalid page size.");
 
 
                 // Get all people
-                var people = context.People
+                List<PeopleViewModel> people = context.People
                 .Select(p => new PeopleViewModel()
                 {
                     Id = p.Id,
                     Name = $"{p.FirstName} {p.LastName}"
-                });
+                })
+                .ToList();
+
+                if (!string.IsNullOrEmpty(search)) { }
+                    people = ApplySearch(context, people, search);
+
+                people = ApplyPagination(people, page, results);
 
 
-                // If a search was made 
-                if (!string.IsNullOrEmpty(search))
-                {
-                    // Get all people matching search
-                    people = context.People
-                        .Where(p => (p.FirstName + " " + p.LastName).StartsWith(search))
-                        .Select(p => new PeopleViewModel 
-                        {
-                            Id = p.Id,
-                            Name = $"{p.FirstName} {p.LastName}"
-                        });
-                }
+                // Check if result is null or empty and return error message depending on if a search was made or not
+                if (people == null || !people.Any())
+                    return Results.NotFound(string.IsNullOrEmpty(search)
+                         ?"Error no people found"
+                        :$"Error. No person found whose name starts with {search}");
 
-
-                // Set default values for pagination if no value was sent in
-                if (page == null)
-                    page = 1;
-
-                if (results == null)
-                    results = people.Count();
-
-                // Calculate the number of items to skip and take based on values sent in
-                int skip = (int)((page - 1) * results);
-                int take = (int)(results);
-
-
-                // Add pagination and save result
-                List<PeopleViewModel> result = 
-                    people
-                    .Skip(skip)
-                    .Take(take)
-                    .ToList();
-
-
-                    if (result == null || !result.Any())
-                        return Results.NotFound(string.IsNullOrEmpty(search)
-                            ?"Error no people found"
-                            :$"Error. No person found whose name starts with {search}");
-
-                return Results.Json(result);
+                return Results.Json(people);
                 
             }
             catch (Exception ex)
             {
-                return Results.Text($"An error occurred: {ex.Message}");
+                return Utility.HandleErrors(ex);
             }
         }
 
+       private static List<PeopleViewModel> ApplySearch(ApplicationContext context, List<PeopleViewModel> people, string? search)
+       {
+            people = context.People
+            .Where(p => (p.FirstName + " " + p.LastName).StartsWith(search))
+            .Select(p => new PeopleViewModel
+            {
+                Id = p.Id,
+                Name = $"{p.FirstName} {p.LastName}"
+            })
+            .ToList();
 
-        // Add a person to the database
-        public static IResult AddPerson(ApplicationContext context, string name, PersonDto personDto)
+            return people;
+       }
+
+        private static List<PeopleViewModel> ApplyPagination(List<PeopleViewModel> people, int? page, int? results)
+        {
+            // Set default values for pagination if no value was sent in
+            if (page == null)
+                page = 1;
+
+            if (results == null)
+                results = people.Count(); // People.Count so all people will be shown if no choice was made
+
+
+            // Calculate the number of items to skip and show based on values sent in
+            int skip = (int)((page - 1) * results);
+            int take = (int)results;
+
+
+            // Add pagination and save result
+            List<PeopleViewModel> peoplePaginated =
+                people
+                .Skip(skip)
+                .Take(take)
+                .ToList();
+
+            return peoplePaginated;
+        }
+
+
+        public static IResult AddPerson(ApplicationContext context, PersonDto personDto)
         {
             try
             {
@@ -94,20 +106,27 @@ namespace API_Project.Handlers
                 context.People.Add(person);
                 context.SaveChanges();
 
-                return Results.Ok();
+                return Results.Ok($"Person {Utility.GetName(person)} added to database.");
             }
             catch (Exception ex)
             {
-                return Results.Text($"An error occurred: {ex.Message}");
+                return Utility.HandleErrors(ex);
             }
         }
 
 
-        // Connect a person to a new interest
         public static IResult ConnectPersonToInterest(ApplicationContext context, string personId, string interestId)
         {
             try
-            {               
+            {
+                // Check if the person and interest exist
+                if (!DbHelper.PersonExists(context, personId))
+                    return Results.NotFound($"Error. Person \"{personId}\" not found.");
+
+                if (!DbHelper.InterestExists(context, interestId))
+                    return Results.NotFound($"Error. Interest \"{interestId}\" not found.");
+
+
                 // Get the interest 
                 Interest interest = context.Interests
                     .Where(i => i.Id == interestId)
@@ -119,15 +138,16 @@ namespace API_Project.Handlers
                     .Include(p => p.Interests)
                     .Single();
 
+
                 // Check if person already has that interest linked to them
                 if (person.Interests.Contains(interest))
                 {
-                    return Results.Text($"{Utility.GetName(person)} already has the interest {interest.Title}");
+                    return Results.Conflict($"{Utility.GetName(person)} already has the interest {interest.Title}");
                 }
 
 
-                person
-                .Interests
+                // Add interest to db
+                person.Interests
                 .Add(interest);
                 context.SaveChanges();
 
@@ -135,36 +155,88 @@ namespace API_Project.Handlers
             }
             catch (Exception ex)
             {
-                return Results.Text($"An error occurred: {ex.Message}");
+                return Utility.HandleErrors(ex);
             }
         }
 
-        // Get all interest links for the selected person
+
         public static IResult GetPersonLinks(ApplicationContext context, string personId)
         {
             try
             {
-                var interestLinks = context.People
-                    .Where(p => p.Id == personId)
-                    .Single()
-                    .InterestsLinks
-                    .Select(il => new InterestsLinkViewModels
+                // Check if the person exist
+                if (!DbHelper.PersonExists(context, personId))
+                    return Results.NotFound($"Error. Person \"{personId}\" not found.");
+
+
+                List<InterestsLinkViewModel> interestLinks = 
+                    context.InterestsLinks
+                    .Where(il => il.Person.Id == personId)
+                    .Select(il => new InterestsLinkViewModel
                     {
                         WebLink = il.WebLink
                     })
                     .ToList();
 
+
                 return Results.Json(interestLinks);
             }
             catch (Exception ex)
             {
-                return Results.Text($"An error occurred: {ex.Message}");
+                return Utility.HandleErrors(ex);
             }
         }
 
-        //public static IResult GetPersonHierarchical()
-        //{
+        public static IResult GetPersonHierarchical(ApplicationContext context, string personId)
+        {
+            try
+            {
+                // Check if the person exist
+                if (!DbHelper.PersonExists(context, personId))
+                    return Results.NotFound($"Error. Person \"{personId}\" not found.");
 
-        //}
+
+                // Get person and all their interests and links
+                Person person = context.People
+                    .Include(p => p.Interests)
+                    .Include(p => p.InterestsLinks)
+                    .Where(p => p.Id == personId)
+                    .Single();
+
+
+                // Get all interests
+                List<InterestPersonViewModel> personInterests =
+                        person.Interests
+                        .Select(i => new InterestPersonViewModel()
+                        {
+                            Title = i.Title,
+                            Description = i.Description,
+                        })
+                        .ToList();
+
+                // Get all interests links
+                List<InterestsLinkViewModel> personInterestLinks =
+                    person.InterestsLinks
+                    .Select(il => new InterestsLinkViewModel()
+                    {
+                        WebLink = il.WebLink
+                    })
+                    .ToList();
+
+                // Create new view model 
+                PersonHierarchicalViewModel result = new PersonHierarchicalViewModel()
+                {
+                    Name = $"{person.FirstName} {person.LastName}",
+                    Interests = personInterests,
+                    InterestsLinks = personInterestLinks
+                };
+
+                return Results.Json(result);
+            }
+            catch (Exception ex)
+            {
+                return Utility.HandleErrors(ex);
+            }
+        }
     }
 }
