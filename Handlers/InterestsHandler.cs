@@ -149,13 +149,18 @@ namespace API_Project.Handlers
                 if (!DbHelper.InterestExists(context, interestId))
                     return Results.NotFound($"Error. Interest \"{interestId}\" not found.");
 
+                Person person = context.People.Where(p => p.Id == personId)
+                    .Single();
+
+                Interest interest = context.Interests.Where(i => i.Id == interestId)
+                    .Single();
 
                 // Add link and the id's to the InterestLink table
                 context.InterestsLinks.Add(new InterestsLink()
                 {
                     WebLink = interestLink.WebLink,
-                    PersonId = personId,
-                    InterestId = interestId
+                    Person = person,
+                    Interests = interest
 
                 });
                 context.SaveChanges();

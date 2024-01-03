@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API_Project.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20231213214044_NullableFields")]
-    partial class NullableFields
+    [Migration("20240103144109_Init")]
+    partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -25,7 +25,7 @@ namespace API_Project.Migrations
 
             modelBuilder.Entity("API_Project.Models.Interest", b =>
                 {
-                    b.Property<string>("id")
+                    b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Description")
@@ -35,7 +35,7 @@ namespace API_Project.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("id");
+                    b.HasKey("Id");
 
                     b.ToTable("interest");
                 });
@@ -48,10 +48,10 @@ namespace API_Project.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<string>("Interestid")
+                    b.Property<string>("InterestId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("Personid")
+                    b.Property<string>("PersonId")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("WebLink")
@@ -59,45 +59,45 @@ namespace API_Project.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Interestid");
+                    b.HasIndex("InterestId");
 
-                    b.HasIndex("Personid");
+                    b.HasIndex("PersonId");
 
-                    b.ToTable("InterestsLink");
+                    b.ToTable("InterestLink");
                 });
 
             modelBuilder.Entity("API_Project.Models.Person", b =>
                 {
-                    b.Property<string>("id")
+                    b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("firstName")
+                    b.Property<string>("FirstName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("lastName")
+                    b.Property<string>("LastName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("phoneNumber")
+                    b.Property<int>("PhoneNumber")
                         .HasColumnType("int");
 
-                    b.HasKey("id");
+                    b.HasKey("Id");
 
                     b.ToTable("person");
                 });
 
             modelBuilder.Entity("InterestPerson", b =>
                 {
-                    b.Property<string>("Interestsid")
+                    b.Property<string>("InterestsId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("Peopleid")
+                    b.Property<string>("PeopleId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("Interestsid", "Peopleid");
+                    b.HasKey("InterestsId", "PeopleId");
 
-                    b.HasIndex("Peopleid");
+                    b.HasIndex("PeopleId");
 
                     b.ToTable("InterestPerson");
                 });
@@ -106,24 +106,24 @@ namespace API_Project.Migrations
                 {
                     b.HasOne("API_Project.Models.Interest", null)
                         .WithMany("InterestsLinks")
-                        .HasForeignKey("Interestid");
+                        .HasForeignKey("InterestId");
 
                     b.HasOne("API_Project.Models.Person", null)
                         .WithMany("InterestsLinks")
-                        .HasForeignKey("Personid");
+                        .HasForeignKey("PersonId");
                 });
 
             modelBuilder.Entity("InterestPerson", b =>
                 {
                     b.HasOne("API_Project.Models.Interest", null)
                         .WithMany()
-                        .HasForeignKey("Interestsid")
+                        .HasForeignKey("InterestsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("API_Project.Models.Person", null)
                         .WithMany()
-                        .HasForeignKey("Peopleid")
+                        .HasForeignKey("PeopleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

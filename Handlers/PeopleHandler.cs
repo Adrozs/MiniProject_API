@@ -143,10 +143,15 @@ namespace API_Project.Handlers
         public static IResult GetPersonLinks(ApplicationContext context, string personId)
         {
             try
-            { 
-                var interestLinks = context.InterestsLinks
-                    .Where(il => il.PersonId == personId)
-                    .Select(il => il.WebLink)
+            {
+                var interestLinks = context.People
+                    .Where(p => p.Id == personId)
+                    .Single()
+                    .InterestsLinks
+                    .Select(il => new InterestsLinkViewModels
+                    {
+                        WebLink = il.WebLink
+                    })
                     .ToList();
 
                 return Results.Json(interestLinks);
@@ -156,5 +161,10 @@ namespace API_Project.Handlers
                 return Results.Text($"An error occurred: {ex.Message}");
             }
         }
+
+        //public static IResult GetPersonHierarchical()
+        //{
+
+        //}
     }
 }

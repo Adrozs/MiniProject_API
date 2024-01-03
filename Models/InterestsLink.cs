@@ -8,13 +8,8 @@ namespace API_Project.Models
         public int Id { get; set; }
         public string? WebLink { get; set; }
 
-        [ForeignKey("Person")]
-        public string PersonId { get; set; }
-        public Person Person { get; set; }
-
-        [ForeignKey("Interest")]
-        public string InterestId { get; set; }
-        public Interest Interest { get; set; }
+        public virtual Person Person { get; set; }
+        public virtual Interest Interests { get; set; }
     }
 
 }
