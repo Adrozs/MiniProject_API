@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API_Project.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20240103144109_Init")]
+    [Migration("20240103202913_Init")]
     partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -48,7 +48,8 @@ namespace API_Project.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<string>("InterestId")
+                    b.Property<string>("InterestsId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("PersonId")
@@ -59,7 +60,7 @@ namespace API_Project.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("InterestId");
+                    b.HasIndex("InterestsId");
 
                     b.HasIndex("PersonId");
 
@@ -104,13 +105,19 @@ namespace API_Project.Migrations
 
             modelBuilder.Entity("API_Project.Models.InterestsLink", b =>
                 {
-                    b.HasOne("API_Project.Models.Interest", null)
+                    b.HasOne("API_Project.Models.Interest", "Interests")
                         .WithMany("InterestsLinks")
-                        .HasForeignKey("InterestId");
+                        .HasForeignKey("InterestsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.HasOne("API_Project.Models.Person", null)
+                    b.HasOne("API_Project.Models.Person", "Person")
                         .WithMany("InterestsLinks")
                         .HasForeignKey("PersonId");
+
+                    b.Navigation("Interests");
+
+                    b.Navigation("Person");
                 });
 
             modelBuilder.Entity("InterestPerson", b =>

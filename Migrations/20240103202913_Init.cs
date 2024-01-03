@@ -42,17 +42,18 @@ namespace API_Project.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     WebLink = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    InterestId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    PersonId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    PersonId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    InterestsId = table.Column<string>(type: "nvarchar(450)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_InterestLink", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_InterestLink_interest_InterestId",
-                        column: x => x.InterestId,
+                        name: "FK_InterestLink_interest_InterestsId",
+                        column: x => x.InterestsId,
                         principalTable: "interest",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_InterestLink_person_PersonId",
                         column: x => x.PersonId,
@@ -85,9 +86,9 @@ namespace API_Project.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_InterestLink_InterestId",
+                name: "IX_InterestLink_InterestsId",
                 table: "InterestLink",
-                column: "InterestId");
+                column: "InterestsId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_InterestLink_PersonId",
