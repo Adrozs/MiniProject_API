@@ -21,6 +21,11 @@ namespace API_Project.Handlers
         {
             return $"{person.FirstName} {person.LastName}";
         }
+
+        public static IResult HandleErrors(Exception ex)
+        {
+            return Results.Text($"An error occurred: {ex.Message}");
+        }
     }
 }
 
