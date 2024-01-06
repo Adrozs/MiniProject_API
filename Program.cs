@@ -35,7 +35,8 @@ namespace API_Project
 
             "INTERESTS:\n" +
             "/interests - Displays all interests and their IDs\n" +
-            "/interests/{search?} - Displays all interests whose title starts with the search\n\n" +
+            "/interests/{search?} - Displays all interests whose title starts with the search\n" +
+            "/interests/page/{page?}/results/{results?}/{search?} - Get all interests and choose page and how many interests shown per page. Option to filter interests on pagination available with search\n\n" +
 
             "PEOPLE & INTERESTS:\n" +
             "/people/{personId}/interests - Displays all interests for the chosen student\n" +
