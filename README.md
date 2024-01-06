@@ -44,7 +44,7 @@ Here it could be nice that the call decides how many people we get in a call, so
 
 
 ## Class Diagram
-![UML-Diagram](https://github.com/adrozs/MiniProject_API/blob/master/UML_Diagram.png?raw=true)
+![UML-Diagram](https://github.com/adrozs/MiniProject_API/blob/master/UM_Diagram.png?raw=true)
 
 
 
