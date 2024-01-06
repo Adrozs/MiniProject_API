@@ -24,7 +24,7 @@ namespace API_Project.Handlers
 
 
                 // Get all interests
-                var interests = context.Interests
+                List<InterestViewModel> interests = context.Interests
                 .Select(p => new InterestViewModel()
                 {
                     Id = p.Id,
@@ -35,7 +35,12 @@ namespace API_Project.Handlers
 
                 // If user sent in a search query apply search
                 if (!string.IsNullOrEmpty(search))
-                    interests = ApplySearch(context, interests, search);
+                {
+                    interests = interests
+                    .Where(i => i.Title
+                    .StartsWith(search))
+                    .ToList();
+                }
 
                 interests = ApplyPagination(interests, page, results);
 
@@ -52,22 +57,6 @@ namespace API_Project.Handlers
             {
                 return Utility.HandleErrors(ex);
             }
-        }
-
-        private static List<InterestViewModel> ApplySearch (ApplicationContext context, List<InterestViewModel> interests, string? search)
-        {
-            // Get selected interests if there was a search
-            interests = context.Interests
-                .Select(i => new InterestViewModel()
-                {
-                    Id = i.Id,
-                    Title = i.Title,
-                })
-                .Where(i => i.Title
-                .StartsWith(search))
-                .ToList();
-
-            return interests;
         }
 
         private static List<InterestViewModel> ApplyPagination (List<InterestViewModel> interests, int? page, int? results)
@@ -128,43 +117,31 @@ namespace API_Project.Handlers
 
                 Person person = DbHelper.GetPersonAndInterests(context, personId);
 
-
                 // Make sure the person has interests and that they're not null
                 if (person.Interests == null || !person.Interests.Any())
                     return Results.NotFound($"Error. No interests found for \"{person.Id}\".");
 
-
-                // Checks if there wasn't a search made an gets all interests for the person
-                if (string.IsNullOrEmpty(search))
+    
+                List<InterestPersonViewModel> personInterests =
+                person.Interests
+                .Select(i => new InterestPersonViewModel()
                 {
-                    
-                    List<InterestPersonViewModel> personInterests =
-                    person.Interests
-                    .Select(i => new InterestPersonViewModel()
-                    {
-                        Title = i.Title,
-                        Description = i.Description,
-                    })
-                    .ToList();
+                    Title = i.Title,
+                    Description = i.Description,
+                })
+                .ToList();
+                
 
-                    return Results.Json(personInterests);
-                }
-                // If a search was made get all interests for the person matching the search
-                else
+                // Apply search if search was made
+                if (!string.IsNullOrEmpty(search))
                 {
-                    List<InterestPersonViewModel> personInterests =
-                    person.Interests
-                    .Select(i => new InterestPersonViewModel()
-                    {
-                        Title = i.Title,
-                        Description = i.Description,
-                    })
+                    personInterests = personInterests
                     .Where(i => i.Title
                     .StartsWith(search))
                     .ToList();
-
-                    return Results.Json(personInterests);
                 }
+
+                return Results.Json(personInterests);      
             }
             catch (Exception ex)
             {
