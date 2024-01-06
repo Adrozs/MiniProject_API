@@ -65,6 +65,7 @@ namespace API_Project.Handlers
             return people;
        }
 
+
         private static List<PeopleViewModel> ApplyPagination(List<PeopleViewModel> people, int? page, int? results)
         {
             // Set default values for pagination if no value was sent in
@@ -80,7 +81,7 @@ namespace API_Project.Handlers
             int take = (int)results;
 
 
-            // Add pagination and save result
+            // Apply pagination and save result
             List<PeopleViewModel> peoplePaginated =
                 people
                 .Skip(skip)
@@ -127,16 +128,9 @@ namespace API_Project.Handlers
                     return Results.NotFound($"Error. Interest \"{interestId}\" not found.");
 
 
-                // Get the interest 
-                Interest interest = context.Interests
-                    .Where(i => i.Id == interestId)
-                    .Single();
+                Interest interest = DbHelper.GetInterest(context, interestId);
 
-                // Get person and their interests
-                var person = context.People
-                    .Where(p => p.Id == personId)
-                    .Include(p => p.Interests)
-                    .Single();
+                Person person = DbHelper.GetPersonAndInterests(context, personId);
 
 
                 // Check if person already has that interest linked to them
