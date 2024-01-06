@@ -59,7 +59,7 @@ namespace API_Project.Handlers
         }
 
 
-        public static IResult AddInterest(ApplicationContext context, string name, InterestDto interestDto)
+        public static IResult AddInterest(ApplicationContext context, InterestDto interestDto)
         {
             try
             {
