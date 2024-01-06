@@ -59,6 +59,7 @@ namespace API_Project
 
             // Interests endpoints
             app.MapGet("/interests/{search?}", InterestsHandler.GetInterests);
+            app.MapGet("/interests/page/{page?}/results{results?}/{search?}", InterestsHandler.GetInterests);
             app.MapPost("/interests", InterestsHandler.AddInterest);
 
             // People interest endpoints
