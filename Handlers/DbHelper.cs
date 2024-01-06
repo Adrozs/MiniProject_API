@@ -34,16 +34,5 @@ namespace API_Project.Handlers
 
             return interest;
         }
-
-        //public static string GetInterestId(ApplicationContext context, string interest)
-        //{
-        //    // Get id from the name
-        //    string interestId = context.Interests
-        //        .Where(i => i.Title == interest)
-        //        .Select(i => i.Id)
-        //        .Single();
-
-        //    return interestId;
-        //}
     }
 }
