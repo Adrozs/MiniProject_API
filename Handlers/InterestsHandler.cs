@@ -54,7 +54,7 @@ namespace API_Project.Handlers
             }
             catch (Exception ex)
             {
-                return Results.Text($"An error occurred: {ex.Message}");
+                return Utility.HandleErrors(ex);
             }
         }
 
@@ -77,7 +77,7 @@ namespace API_Project.Handlers
             }
             catch (Exception ex)
             {
-                return Results.Text($"An error occurred: {ex.Message}");
+                return Utility.HandleErrors(ex);
             }
         }
 
@@ -134,7 +134,7 @@ namespace API_Project.Handlers
             }
             catch (Exception ex)
             {
-                return Results.Text($"An error occurred: {ex.Message}");
+                return Utility.HandleErrors(ex);
             }
         }
 
@@ -179,7 +179,7 @@ namespace API_Project.Handlers
             }
             catch (Exception ex)
             {
-                return Results.Text($"An error occurred: {ex.Message}");
+                return Utility.HandleErrors(ex);
             }
         }
     }
