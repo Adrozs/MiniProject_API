@@ -69,9 +69,9 @@ namespace API_Project
             // Interests link endpoints
             app.MapGet("/people/{personId}/interests/links", PeopleHandler.GetPersonLinks);
             app.MapPost("/people/{personId}/interests/{interestId}/links/", InterestsHandler.AddInterestLink);
-            
 
-            app.Run()
+
+            app.Run();
         }
     }
 }
