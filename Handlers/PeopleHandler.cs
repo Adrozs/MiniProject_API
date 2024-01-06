@@ -30,7 +30,7 @@ namespace API_Project.Handlers
                 })
                 .ToList();
 
-                if (!string.IsNullOrEmpty(search)) { }
+                if (!string.IsNullOrEmpty(search))
                     people = ApplySearch(context, people, search);
 
                 people = ApplyPagination(people, page, results);
@@ -53,13 +53,9 @@ namespace API_Project.Handlers
 
        private static List<PeopleViewModel> ApplySearch(ApplicationContext context, List<PeopleViewModel> people, string? search)
        {
-            people = context.People
-            .Where(p => (p.FirstName + " " + p.LastName).StartsWith(search))
-            .Select(p => new PeopleViewModel
-            {
-                Id = p.Id,
-                Name = $"{p.FirstName} {p.LastName}"
-            })
+            people = people
+            .Where(p => p.Name.ToLower()
+            .StartsWith(search.ToLower()))
             .ToList();
 
             return people;

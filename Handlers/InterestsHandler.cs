@@ -37,8 +37,8 @@ namespace API_Project.Handlers
                 if (!string.IsNullOrEmpty(search))
                 {
                     interests = interests
-                    .Where(i => i.Title
-                    .StartsWith(search))
+                    .Where(i => i.Title.ToLower()
+                    .StartsWith(search.ToLower()))
                     .ToList();
                 }
 
@@ -136,8 +136,8 @@ namespace API_Project.Handlers
                 if (!string.IsNullOrEmpty(search))
                 {
                     personInterests = personInterests
-                    .Where(i => i.Title
-                    .StartsWith(search))
+                    .Where(i => i.Title.ToLower()
+                    .StartsWith(search.ToLower()))
                     .ToList();
                 }
 
