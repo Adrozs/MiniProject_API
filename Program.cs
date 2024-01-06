@@ -71,37 +71,7 @@ namespace API_Project
             app.MapPost("/people/{personId}/interests/{interestId}/links/", InterestsHandler.AddInterestLink);
             
 
-            app.Run();
-
-
-            // TO DO
-            // [x] Get all people in the database
-
-            // [x] Get all interest connected to a specific person
-
-            // [x] Connect a person to a new interest
-
-            // [x] Add new links for a specific person and a specific interest
-
-            // [x] Get all links that are connected to a specific person
-
-            // EXTRA CHALLENGES
-            // [x] Give the option for the one calling the API and asking for a person to get out all interests
-            // and all links for that person directly in a hierarchical JSON-file
-
-            // [x] Give the option for the one calling the API to filter what they get back, like a search.
-            // For example if we send "to" when getting all people in the database we should get back everyone that
-            // has a "to" in their name, like "Tobias or "Tomas". 
-            // This you can create for all calls (anrop) if you want.
-            // [x] Add search to more methods?
-
-
-            // [x] Create paginering of the calls (anrop). When we call for example people we maybe get the first
-            // 100 people and have to call more time to get more people. 
-            // Here it could be nice that the call decides how many people we get in a call, so we can choose to get
-            // say 10 people if we just want that.
-
-
+            app.Run()
         }
     }
 }
