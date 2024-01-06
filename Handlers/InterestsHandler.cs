@@ -3,54 +3,50 @@ using API_Project.DTO;
 using API_Project.Models;
 using API_Project.ViewModels;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Net;
+using System.Runtime.CompilerServices;
 
 namespace API_Project.Handlers
 {
     public class InterestsHandler
     {
         // Gets all/searched interests and their ids in the database 
-        public static IResult GetInterests(ApplicationContext context, string? search)
+        public static IResult GetInterests(ApplicationContext context, int? page, int? results, string? search)
         {
             try 
-            { 
-                // Check if user sent in a search query or not
-                if (string.IsNullOrEmpty(search))
+            {
+                // Check if page or result is less than 1 return error message depending on which one was true
+                if (page < 1 || results < 1)
+                    return Results.BadRequest(page < 1
+                         ? "Invalid page number."
+                        : $"Invalid page size.");
+
+
+                // Get all interests
+                var interests = context.Interests
+                .Select(p => new InterestViewModel()
                 {
-                    // Get all interests if there was no search
-                    var interests = context.Interests
-                    .Select(p => new InterestViewModel()
-                    {
-                        Id = p.Id,
-                        Title = p.Title,
-                    })
-                    .ToList();
+                    Id = p.Id,
+                    Title = p.Title,
+                })
+                .ToList();
 
-                    if (interests == null || !interests.Any())
-                        return Results.NotFound("Error. No interests found.");
 
-                    return Results.Json(interests);
-                }
-                else
-                {
-                    // Get selected interests if there was a search
-                    List<InterestViewModel> interests = context.Interests
-                    .Select(i => new InterestViewModel()
-                    {
-                        Id = i.Id,
-                        Title = i.Title,
-                    })
-                    .Where(i => i.Title
-                    .StartsWith(search))
-                    .ToList();
+                // If user sent in a search query apply search
+                if (!string.IsNullOrEmpty(search))
+                    interests = ApplySearch(context, interests, search);
 
-                    Console.WriteLine(interests);
+                interests = ApplyPagination(interests, page, results);
 
-                    if (interests == null || !interests.Any())
-                        return Results.NotFound($"Error. No interests found whose title starts with {search}");
 
-                    return Results.Json(interests);
-                }
+                // Check if result is null or empty and return error message depending on if a search was made or not
+                if (interests == null || !interests.Any())
+                    return Results.NotFound(string.IsNullOrEmpty(search) 
+                        ?"Error. No interests found."
+                        : $"Error. No interests found whose title starts with {search}");
+
+                return Results.Json(interests);
             }
             catch (Exception ex)
             {
@@ -58,6 +54,46 @@ namespace API_Project.Handlers
             }
         }
 
+        private static List<InterestViewModel> ApplySearch (ApplicationContext context, List<InterestViewModel> interests, string? search)
+        {
+            // Get selected interests if there was a search
+            interests = context.Interests
+                .Select(i => new InterestViewModel()
+                {
+                    Id = i.Id,
+                    Title = i.Title,
+                })
+                .Where(i => i.Title
+                .StartsWith(search))
+                .ToList();
+
+            return interests;
+        }
+
+        private static List<InterestViewModel> ApplyPagination (List<InterestViewModel> interests, int? page, int? results)
+        {
+            // Set default values for pagination if no value was sent in
+            if (page == null)
+                page = 1;
+
+            if (results == null)
+                results = interests.Count(); // interests.Count so all interests will be shown if no choice was made
+
+
+            // Calculate the number of items to skip and show based on values sent in
+            int skip = (int)((page - 1) * results);
+            int take = (int)results;
+
+
+            // Apply pagination and save result
+            List<InterestViewModel> interestsPaginated =
+                interests
+                .Skip(skip)
+                .Take(take)
+                .ToList();
+
+            return interestsPaginated;
+        }
 
         public static IResult AddInterest(ApplicationContext context, InterestDto interestDto)
         {
@@ -73,7 +109,7 @@ namespace API_Project.Handlers
                 context.Interests.Add(interest);
                 context.SaveChanges();
 
-                return Results.StatusCode((int)HttpStatusCode.Created);
+                return Results.Ok($"Interest {interest.Title} added to database.");
             }
             catch (Exception ex)
             {
@@ -149,7 +185,7 @@ namespace API_Project.Handlers
                     return Results.NotFound($"Error. Interest \"{interestId}\" not found.");
 
 
-                // Get person and interest separatley
+                // Get person and interest separately
 
                 Person person = 
                     context.People
@@ -173,7 +209,7 @@ namespace API_Project.Handlers
                     });
                     context.SaveChanges();
 
-                return Results.StatusCode((int)HttpStatusCode.Created);
+                return Results.Ok($"Link added to {Utility.GetName(person)} for interest {interest.Title}.");
             }
             catch (Exception ex)
             {
