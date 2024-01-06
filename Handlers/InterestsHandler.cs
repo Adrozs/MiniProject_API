@@ -89,10 +89,8 @@ namespace API_Project.Handlers
                 if (!DbHelper.PersonExists(context, personId))
                     return Results.NotFound($"Error. Person \"{personId}\" not found.");
 
-                Person person = context.People
-                        .Include(p => p.Interests)
-                        .Where(p => p.Id == personId)
-                        .Single();
+
+                Person person = DbHelper.GetPersonAndInterests(context, personId);
 
 
                 // Make sure the person has interests and that they're not null
@@ -151,7 +149,7 @@ namespace API_Project.Handlers
                     return Results.NotFound($"Error. Interest \"{interestId}\" not found.");
 
 
-                // Get person and interest
+                // Get person and interest separatley
 
                 Person person = 
                     context.People
